@@ -257,9 +257,9 @@ void crearArchivoTemporal(Transaccion *transacciones, short numlineas) {
     }
 
     for (int i = 0; i < numlineas; i++) {
-        fprintf(archivo, "%d | %s | %s | %s | %s | %s | %.2f\n", transacciones[i].referencia, transacciones[i].fecha,
-                transacciones[i].pan, transacciones[i].cvv, transacciones[i].fechaExp,
-                TIPO_TRANSACCION_STR[transacciones[i].tipo], transacciones[i].monto);
+        fprintf(archivo, "%d | %s | %s | %s | %s | %s | %s | %.2f\n", transacciones->referencia, transacciones->fecha,
+            FRANQUICIAS_STR[transacciones->franquicia], transacciones->pan, transacciones->cvv, transacciones->fechaExp,
+            TIPO_TRANSACCION_STR[transacciones->tipo], transacciones->monto);
     }
 
     fclose(archivo);

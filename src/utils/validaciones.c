@@ -81,6 +81,21 @@ bool validarFecha(const char* fecha) {
 
 bool esPANValido(Transaccion *transaccion, const char *pan) {
     short len = strlen(pan);
+    short result = 0;
+
+    // TODO: terminar el algoritmo de luhn
+    for (int i = len; i >= 0; i--) {
+        if (i % 2 != 0) {
+            result = (short) pan[i] * 2;
+            if (result > 10) {
+                result = result + result;
+            }
+            result += (short) pan[i] * 2;
+        }
+    }
+
+    printf("%hd \n", result);
+
     if (len < 13 || len > 19) {
         printf("Formato incorrecto \n");
         return false;
