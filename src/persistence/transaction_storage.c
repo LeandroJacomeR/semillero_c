@@ -338,9 +338,6 @@ void anulacion(const short ref, const char pan[5], const char cvv[5]) {
             transacciones[i].monto = atof(token);
         }
 
-        printf("fff - %s \n", transacciones[i].pan);
-        printf("fff %s \n", pan);
-
         if (ref == transacciones[i].referencia &&
             strcmp(pan, &transacciones[i].pan[12]) == 0 && // Comparar los últimos 4 dígitos del PAN
             strcmp(cvv, transacciones[i].cvv) == 0 &&
