@@ -1,7 +1,8 @@
 #ifndef TRANSACCION_H
 #define TRANSACCION_H
 
-extern const char *tipoTransaccionStr[];
+extern const char *TIPO_TRANSACCION_STR[];
+extern const char *FRANQUICIAS_STR[];
 
 typedef enum {
     ANULACION,
@@ -12,8 +13,7 @@ typedef enum {
     AMERICAN_EXPRESS,
     VISA,
     MASTERCARD,
-    DISCOVER,
-    JCB
+    DISCOVER
 } Franquicia;
 
 typedef struct {
@@ -26,5 +26,7 @@ typedef struct {
     char cvv[4];
     char fechaExp[5];
 } Transaccion;
+
+Franquicia obtenerFranquiciaPorNombre(const char *nombre);
 
 #endif //TRANSACCION_H
