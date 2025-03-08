@@ -22,8 +22,8 @@ typedef struct {
     Franquicia franquicia;
     TipoTransaccion tipo;
     float monto;
-    char pan[17];
-    char cvv[4];
+    char pan[19];
+    char cvv[5];
     char fechaExp[5];
 } Transaccion;
 

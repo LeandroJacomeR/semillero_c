@@ -6,6 +6,7 @@
 #include <conio.h>
 
 const char *nombre_archivo = "transacciones.txt";
+const char *old_nombre_archivo = "transacciones_temp.txt";
 const short MAX_LINEA = 150; // (150 tamaño maximo de una linea)
 
 static void imprimirTransaccion(Transaccion transaccion) {
@@ -123,7 +124,8 @@ void mostrarTransacciones() {
         token = strtok(NULL, " | ");
         monto = atof(token); // Convertimos a float
 
-        printf("%d | %s | %s | %s | %s | %s | %s | %.2f\n", referencia, franquicia, fecha, pan, cvv, fechaExp, tipo, monto);
+        printf("%d | %s | %s | %s | %s | %s | %s | %.2f\n", referencia, franquicia, fecha, pan, cvv, fechaExp, tipo,
+               monto);
 
         // Eliminar espacios en tipo
         for (int i = 0; i < strlen(tipo); i++) {
@@ -167,7 +169,7 @@ void imprimirDesc() {
     rewind(archivo);
 
     // Crear un arreglo para almacenar las transacciones
-    Transaccion* transacciones = (Transaccion*)malloc(numLineas * sizeof(Transaccion));
+    Transaccion *transacciones = (Transaccion *) malloc(numLineas * sizeof(Transaccion));
     if (transacciones == NULL) {
         printf("Error al asignar memoria\n");
         fclose(archivo);
@@ -178,16 +180,13 @@ void imprimirDesc() {
     int i = 0;
     while (fgets(linea, sizeof(linea), archivo) != NULL) {
         char franquicia[30];
-        // Verificación de la línea leída
         printf("Leyendo linea: %s", linea);
 
-        // Asegurarnos de no exceder el número de transacciones
         if (i >= numLineas) {
             printf("Error: demasiadas líneas en el archivo\n");
             break;
         }
 
-        // Usamos strtok para dividir la línea usando el delimitador " | "
         char *token = strtok(linea, " | ");
         if (token == NULL) break;
 
@@ -195,26 +194,26 @@ void imprimirDesc() {
 
         token = strtok(NULL, " | ");
         if (token != NULL) strncpy(transacciones[i].fecha, token, sizeof(transacciones[i].fecha) - 1);
-        transacciones[i].fecha[sizeof(transacciones[i].fecha) - 1] = '\0';  // Asegurar que la cadena esté terminada
+        transacciones[i].fecha[sizeof(transacciones[i].fecha) - 1] = '\0';
 
         token = strtok(NULL, " | ");
         if (token != NULL) {
-            strncpy(franquicia, token, sizeof(franquicia) - 1);  // Copiar la franquicia al arreglo
+            strncpy(franquicia, token, sizeof(franquicia) - 1);
             franquicia[sizeof(franquicia) - 1] = '\0';
             transacciones[i].franquicia = obtenerFranquiciaPorNombre(franquicia);
         }
 
         token = strtok(NULL, " | ");
         if (token != NULL) strncpy(transacciones[i].pan, token, sizeof(transacciones[i].pan) - 1);
-        transacciones[i].pan[sizeof(transacciones[i].pan) - 1] = '\0';  // Asegurar que la cadena esté terminada
+        transacciones[i].pan[sizeof(transacciones[i].pan) - 1] = '\0';
 
         token = strtok(NULL, " | ");
         if (token != NULL) strncpy(transacciones[i].cvv, token, sizeof(transacciones[i].cvv) - 1);
-        transacciones[i].cvv[sizeof(transacciones[i].cvv) - 1] = '\0';  // Asegurar que la cadena esté terminada
+        transacciones[i].cvv[sizeof(transacciones[i].cvv) - 1] = '\0';
 
         token = strtok(NULL, " | ");
         if (token != NULL) strncpy(transacciones[i].fechaExp, token, sizeof(transacciones[i].fechaExp) - 1);
-        transacciones[i].fechaExp[sizeof(transacciones[i].fechaExp) - 1] = '\0';  // Asegurar que la cadena esté terminada
+        transacciones[i].fechaExp[sizeof(transacciones[i].fechaExp) - 1] = '\0';
 
         token = strtok(NULL, " | ");
         if (token != NULL) {
@@ -231,13 +230,10 @@ void imprimirDesc() {
             transacciones[i].monto = atof(token);
         }
 
-        // Verificación de la transacción leída
-        printf("Transaccion leida: Referencia: %d, Fecha:  %s, Franquicia : %d, Monto: %.2f\n", transacciones[i].referencia, transacciones[i].fecha, transacciones[i].franquicia, transacciones[i].monto);
-
-        i++;  // Incrementamos el índice de las transacciones
+        i++;
     }
 
-    fclose(archivo);  // Cerramos el archivo
+    fclose(archivo); // Cerramos el archivo
 
     // Imprimir las transacciones en orden inverso
     for (int j = numLineas - 1; j >= 0; j--) {
@@ -269,7 +265,7 @@ void crearArchivoTemporal(Transaccion *transacciones, short numlineas) {
     fclose(archivo);
 }
 
-void anulacion(const short ref, const char pan[5], const char cvv[4]) {
+void anulacion(const short ref, const char pan[5], const char cvv[5]) {
     FILE *archivo = fopen(nombre_archivo, "r");
     if (archivo == NULL) {
         printf("No se pudo abrir el archivo\n");
@@ -292,28 +288,70 @@ void anulacion(const short ref, const char pan[5], const char cvv[4]) {
     int i = 0;
     bool transaccionEncontrada = false; // Flag para verificar si encontramos la transacción a anular
     while (fgets(linea, sizeof(linea), archivo) != NULL) {
-        // Leer los datos de la línea
-        sscanf(linea, "%d | %10[^|] | %16[^|] | %3[^|] | %5[^|] | %9[^|] | %f",
-               &transacciones[i].referencia, transacciones[i].fecha, transacciones[i].pan,
-               transacciones[i].cvv, transacciones[i].fechaExp, linea, &transacciones[i].monto);
+        char franquicia[30];
 
-        // Determinar el tipo de transacción (Compra o Anulación)
-        if (strstr(linea, "Compra")) {
-            transacciones[i].tipo = COMPRA; // Asignar tipo COMPRA
-        } else if (strstr(linea, "Anulada")) {
-            transacciones[i].tipo = ANULACION; // Asignar tipo ANULACION
+        if (i >= numLineas) {
+            printf("Error: demasiadas líneas en el archivo\n");
+            break;
         }
 
-        // Intentar encontrar la transacción a anular
+        char *token = strtok(linea, " | ");
+        if (token == NULL) break;
+
+        transacciones[i].referencia = atoi(token);
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) strncpy(transacciones[i].fecha, token, sizeof(transacciones[i].fecha) - 1);
+        transacciones[i].fecha[sizeof(transacciones[i].fecha) - 1] = '\0';
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) {
+            strncpy(franquicia, token, sizeof(franquicia) - 1);
+            franquicia[sizeof(franquicia) - 1] = '\0';
+            transacciones[i].franquicia = obtenerFranquiciaPorNombre(franquicia);
+        }
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) strncpy(transacciones[i].pan, token, sizeof(transacciones[i].pan) - 1);
+        transacciones[i].pan[sizeof(transacciones[i].pan) - 1] = '\0';
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) strncpy(transacciones[i].cvv, token, sizeof(transacciones[i].cvv) - 1);
+        transacciones[i].cvv[sizeof(transacciones[i].cvv) - 1] = '\0';
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) strncpy(transacciones[i].fechaExp, token, sizeof(transacciones[i].fechaExp) - 1);
+        transacciones[i].fechaExp[sizeof(transacciones[i].fechaExp) - 1] = '\0';
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) {
+            // Determinar el tipo de transacción
+            if (strcmp(token, "Compra") == 0) {
+                transacciones[i].tipo = COMPRA;
+            } else if (strcmp(token, "Anulada") == 0) {
+                transacciones[i].tipo = ANULACION;
+            }
+        }
+
+        token = strtok(NULL, " | ");
+        if (token != NULL) {
+            transacciones[i].monto = atof(token);
+        }
+
+        printf("fff - %s \n", transacciones[i].pan);
+        printf("fff %s \n", pan);
+
         if (ref == transacciones[i].referencia &&
             strcmp(pan, &transacciones[i].pan[12]) == 0 && // Comparar los últimos 4 dígitos del PAN
             strcmp(cvv, transacciones[i].cvv) == 0 &&
             transacciones[i].tipo != ANULACION) {
             // Solo anular si no ha sido anulada aún
 
+            printf("%s \n", transacciones[i].cvv);
             transacciones[i].tipo = ANULACION; // Cambiar tipo a ANULACION
             transaccionEncontrada = true; // Marcar que encontramos la transacción
         }
+
         i++;
     }
 
@@ -328,13 +366,14 @@ void anulacion(const short ref, const char pan[5], const char cvv[4]) {
 
     // Eliminar el archivo antiguo y guardar las transacciones modificadas
     if (eliminarArchivo()) {
+        rename(old_nombre_archivo, nombre_archivo);
+        printf("Transaccion anulada correctamente.\n");
+    } else {
         for (int j = 0; j < numLineas; j++) {
             if (!guardarArchivo(transacciones[j])) {
                 printf("Error al guardar la transacción %d\n", transacciones[j].referencia);
             }
         }
-        printf("Transaccion anulada correctamente.\n");
-    } else {
         printf("Error al eliminar el archivo original.\n");
     }
 
